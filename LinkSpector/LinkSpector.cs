@@ -153,7 +153,7 @@ public class LinkSpector
 	{
 		HashSet<Uri> uris = new();
 		if (response.Content.Headers.ContentType?.MediaType != "text/html") return uris;
-		string content = await response.Content.ReadAsStringAsync();
+		string content = SanitizeHtml(await response.Content.ReadAsStringAsync());
 		
 		#region Absolute URI matching
 		// Match absolute HTTP(s) URIs
@@ -172,5 +172,34 @@ public class LinkSpector
 		#endregion
 
 		return uris;
+	}
+
+	/// <summary>
+	/// Sanitizes the HTML content.
+	/// E.g., remove comment blocks
+	/// </summary>
+	/// <param name="html">The HTML content.</param>
+	/// <returns>The sanitized HTML content.</returns>
+	private string SanitizeHtml(string html)
+	{
+		StringBuilder sb = new();
+		for (int i = 0; i < html.Length - 3; i++)
+		{
+			if (html[i] == '<' && html[i + 1] == '!' && html[i + 2] == '-' && html[i + 3] == '-')
+			{
+				// Skip until the end of the comment block
+				while (i < html.Length - 2 && !(html[i] == '-' && html[i + 1] == '-' && html[i + 2] == '>'))
+				{
+					i++;
+				}
+
+				i += 2;
+			}
+			else
+			{
+				sb.Append(html[i]);
+			}
+		}
+		return sb.ToString();
 	}
 }
