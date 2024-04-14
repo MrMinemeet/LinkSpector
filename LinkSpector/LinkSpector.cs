@@ -2,7 +2,7 @@ namespace LinkSpector;
 
 public class LinkSpector
 {
-	public List<Result> Results { get; private set; } = new();
+	public List<LinkSpectorResult> Results { get; private set; } = new();
 	private readonly Crawler _crawler;
 	private readonly Uri _rootUri;
 

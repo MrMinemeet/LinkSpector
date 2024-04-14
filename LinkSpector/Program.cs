@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
 namespace LinkSpector;
 
@@ -18,6 +18,6 @@ static class Program
 		stopwatch.Stop();
 		Console.WriteLine($"LinkSpector completed in {stopwatch.ElapsedMilliseconds}ms");
 
-		List<Result> results = linkSpector.Results;
+		List<LinkSpectorResult> results = linkSpector.Results;
 	}
 }
