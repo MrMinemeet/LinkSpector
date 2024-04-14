@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Net;
 
 namespace LinkSpector;
 
@@ -36,7 +35,7 @@ static class Program
 		
 		Console.WriteLine($"\ud83d\udd0e {totalResults} Total (in {stopwatch.ElapsedMilliseconds}ms) - \u2705 {okResults} OK, \u26d4 {errorResults} Error(s)");
 		
-		foreach(LinkSpectorResult result in results.Where(r => r.StatusCode != 200))
+		foreach(LinkSpectorResult result in results.Where(r => r.StatusCode != 200 && r.StatusCode > 0))
 		{
 			Console.WriteLine(result);
 		}
