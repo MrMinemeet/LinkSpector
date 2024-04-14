@@ -173,7 +173,21 @@ public class LinkSpector
 
 		#region Relative URI matching
 
-		// TODO: Find relative URIs in the content
+		// Match relative URIS based on href or src attributes. And they must not start with http(s)://
+		List<Match> relUris = Regex.Matches(content, @"(?:href|src)=""(?<uri>(?!(?:https?://|#))[^""]*)""").ToList();
+		foreach (Match m in relUris)
+		{
+			try
+			{
+				if(response.RequestMessage == null || response.RequestMessage.RequestUri == null) continue;
+				uris.Add(new Uri(response.RequestMessage.RequestUri, m.Groups["uri"].Value));
+			}
+			catch (UriFormatException ex)
+			{
+				Logger.Error($"Could not convert '{m}' to an URI: {ex.Message}");
+			}
+		}
+		
 
 		#endregion
 
