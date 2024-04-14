@@ -7,21 +7,16 @@ namespace LinkSpector;
 public class LinkSpector
 {
 	private const int EXCEPTION_DURING_REQUEST = -100;
-	
+
 	public List<LinkSpectorResult> Results { get; } = new();
+	public LinkSpectorOptions Options { get; } = new();
 	private readonly Crawler _crawler;
 	private readonly Uri _rootUri;
 
 	public LinkSpector(Uri rootUri)
 	{
-		_crawler = new();
+		_crawler = new(Options.Timeout, Options.AllowInsecure);
 		_rootUri = rootUri;
-	}
-
-	public LinkSpector(string rootUri)
-	{
-		_crawler = new();
-		_rootUri = new Uri(rootUri);
 	}
 
 	/// <summary>
@@ -29,7 +24,7 @@ public class LinkSpector
 	/// </summary>
 	public void Run()
 	{
-		Logger.Debug("Running LinkSpector...");
+		Logger.Info("Running LinkSpector...");
 		List<HttpResponseMessage?> responseMessages = PerformCrawl().Result;
 		foreach (HttpResponseMessage? response in responseMessages)
 		{
@@ -66,8 +61,10 @@ public class LinkSpector
 		Dictionary<Uri, HttpResponseMessage?> visited = new();
 
 		Logger.Debug("Starting crawl...");
-		while (toRequest.Count != 0)
+		for (int iteration = 0; toRequest.Count > 0; iteration++)
 		{
+			if (!Options.Recursive && iteration > 1) break;
+
 			#region Perform request batch
 
 			Dictionary<Uri, HttpResponseMessage?> currentVisited = new();
@@ -154,21 +151,30 @@ public class LinkSpector
 		HashSet<Uri> uris = new();
 		if (response.Content.Headers.ContentType?.MediaType != "text/html") return uris;
 		string content = SanitizeHtml(await response.Content.ReadAsStringAsync());
-		
+
 		#region Absolute URI matching
+
 		// Match absolute HTTP(s) URIs
 		List<Match> absUris = Regex.Matches(content, @"(https?://[^\s]+)(?=\"")").ToList();
 		Logger.Debug($"Found {absUris.Count} absolute URIs in response of '{response.RequestMessage?.RequestUri}'");
 		absUris.ForEach(m =>
 		{
-			try { uris.Add(new Uri(m.Value)); }
-			catch (UriFormatException ex) { Logger.Error($"Could not convert '{m}' to an URI: {ex.Message}"); }
+			try
+			{
+				uris.Add(new Uri(m.Value));
+			}
+			catch (UriFormatException ex)
+			{
+				Logger.Error($"Could not convert '{m}' to an URI: {ex.Message}");
+			}
 		});
 
 		#endregion
-		
+
 		#region Relative URI matching
+
 		// TODO: Find relative URIs in the content
+
 		#endregion
 
 		return uris;
@@ -200,6 +206,7 @@ public class LinkSpector
 				sb.Append(html[i]);
 			}
 		}
+
 		return sb.ToString();
 	}
 }
