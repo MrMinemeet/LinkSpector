@@ -1,16 +1,20 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace LinkSpector;
 
 static class Program
 {
-	static void Main(string[] args)
+	static int Main(string[] args)
 	{
-		
-		// TODO: Parse the command line arguments and retrieve the root URI from the arguments
+		if (args.Length != 1)
+		{
+			Console.Error.WriteLine("Usage: ./LinkSpector <rootUri>");
+			return 1;
+		}
+		Uri rootUri = ParseUri(args[0]);
 		
 		// Create a new instance of the LinkSpector class
-		LinkSpector linkSpector = new(new Uri("https://wtf-my-code.works/"));
+		LinkSpector linkSpector = new(rootUri);
 
 		Stopwatch stopwatch = Stopwatch.StartNew();
 		// Run the LinkSpector
@@ -25,7 +29,16 @@ static class Program
 		int errorResults = results.Count(r => r.StatusCode != 200);
 		
 		Console.WriteLine($"\ud83d\udd0e {totalResults} Total (in {stopwatch.ElapsedMilliseconds}ms) - \u2705 {okResults} OK, \u26d4 {errorResults} Errors");
+		return 0;
+	}
+	
+	private static Uri ParseUri(string uri)
+	{
+		if (Uri.TryCreate(uri, UriKind.Absolute, out Uri? result))
+		{
+			return result;
+		}
 		
-		
+		throw new ArgumentException("Invalid URI", nameof(uri));
 	}
 }
