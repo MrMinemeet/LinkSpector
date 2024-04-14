@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace LinkSpector;
 
 public class Crawler
@@ -14,7 +16,7 @@ public class Crawler
 	{
 		_client = new();
 		_client.Timeout = TimeSpan.FromSeconds(timeout);
-		_client.DefaultRequestHeaders.Add("User-Agent", USER_AGENT);
+		_client.DefaultRequestHeaders.Add("User-Agent", $"{USER_AGENT} v{Assembly.GetExecutingAssembly().GetName().Version}");
 	}
 	
 	/// <summary>
