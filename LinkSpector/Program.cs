@@ -35,7 +35,7 @@ static class Program
 		int okResults = results.Count(r => r.StatusCode == 200);
 		int errorResults = results.Count(r => r.StatusCode != 200);
 		
-		Console.WriteLine($"\ud83d\udd0e {totalResults} Total (in {stopwatch.ElapsedMilliseconds}ms) - \u2705 {okResults} OK, \u26d4 {errorResults} Errors");
+		Console.WriteLine($"\ud83d\udd0e {totalResults} Total (in {stopwatch.ElapsedMilliseconds}ms) - \u2705 {okResults} OK, \u26d4 {errorResults} Error(s)");
 		return (int)ExitCode.Ok;
 	}
 	
