@@ -6,17 +6,28 @@ public class Crawler
 {
 	private const string USER_AGENT = "LinkSpector";
 	private readonly HttpClient _client;
-	
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="Crawler"/> class.
 	/// </summary>
 	/// <param name="timeout">The timeout in seconds.</param>
-	public Crawler(int timeout = 60)
+	/// <param name="allowInsecure">if set to <c>true</c> allow insecure SSL certificates.</param>
+	public Crawler(int timeout = 20, bool allowInsecure = false)
 	{
-		_client = new();
+		if (allowInsecure)
+		{
+			HttpClientHandler handler = new();
+			handler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
+			_client = new(handler);
+		}
+		else
+		{
+			_client = new();
+		}
+		
 		_client.Timeout = TimeSpan.FromSeconds(timeout);
 		_client.DefaultRequestHeaders.Add("User-Agent", $"{USER_AGENT} v{Assembly.GetExecutingAssembly().GetName().Version}");
+		_client.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
 	}
 	
 	/// <summary>
