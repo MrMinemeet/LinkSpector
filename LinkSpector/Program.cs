@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace LinkSpector;
 
@@ -19,5 +19,13 @@ static class Program
 		Console.WriteLine($"LinkSpector completed in {stopwatch.ElapsedMilliseconds}ms");
 
 		List<LinkSpectorResult> results = linkSpector.Results;
+		
+		int totalResults = results.Count;
+		int okResults = results.Count(r => r.StatusCode == 200);
+		int errorResults = results.Count(r => r.StatusCode != 200);
+		
+		Console.WriteLine($"\ud83d\udd0e {totalResults} Total (in {stopwatch.ElapsedMilliseconds}ms) - \u2705 {okResults} OK, \u26d4 {errorResults} Errors");
+		
+		
 	}
 }

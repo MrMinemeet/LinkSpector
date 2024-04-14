@@ -1,5 +1,3 @@
-using System.Net.Cache;
-
 namespace LinkSpector;
 
 public class Crawler
