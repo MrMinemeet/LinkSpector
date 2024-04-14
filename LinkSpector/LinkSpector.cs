@@ -155,7 +155,7 @@ public class LinkSpector
 		#region Absolute URI matching
 
 		// Match absolute HTTP(s) URIs
-		List<Match> absUris = Regex.Matches(content, @"(https?://[^\s]+)(?=\"")").ToList();
+		List<Match> absUris = Regex.Matches(content, @"(https?://[^\s""]+)").ToList();
 		Logger.Debug($"Found {absUris.Count} absolute URIs in response of '{response.RequestMessage?.RequestUri}'");
 		absUris.ForEach(m =>
 		{
