@@ -23,6 +23,7 @@ public class LinkSpector
 	/// </summary>
 	public void Run()
 	{
+		Logger.Debug("Running LinkSpector...");
 		List<HttpResponseMessage> responseMessages = PerformCrawl().Result;
 		foreach (HttpResponseMessage response in responseMessages)
 		{
@@ -33,8 +34,7 @@ public class LinkSpector
 				response.ReasonPhrase ?? "Unknown"
 			));
 		}
-
-		Console.WriteLine("Running LinkSpector...");
+		Logger.Debug("LinkSpector completed");
 	}
 
 	/// <summary>
@@ -47,6 +47,7 @@ public class LinkSpector
 		List<Uri> toRequest = [_rootUri];
 		Dictionary<Uri, HttpResponseMessage> visited = new();
 
+		Logger.Debug("Starting crawl...");
 		while (toRequest.Count != 0)
 		{
 			runningTasks.Clear();
@@ -55,9 +56,9 @@ public class LinkSpector
 			{
 				runningTasks.Add(Task.Run(async () =>
 				{
-					Console.WriteLine($"Task requesting '{uri}'");
+					Logger.Debug($"Task requesting '{uri}'");
 					Task<HttpResponseMessage> response = _crawler.GetWebPage(uri);
-					Console.WriteLine($"Task '{uri}' completed");
+					Logger.Debug($"Task '{uri}' completed");
 					await response;
 					visited[uri] = response.Result;
 				}));
@@ -71,7 +72,7 @@ public class LinkSpector
 
 			// TODO: Extract the URIs from the responses and add them to the list of URIs to request
 		}
-
+		Logger.Debug("Crawl completed");
 		return visited.Values.ToList();
 	}
 }
