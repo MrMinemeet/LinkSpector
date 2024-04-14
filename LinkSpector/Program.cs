@@ -9,9 +9,16 @@ static class Program
 		if (args.Length != 1)
 		{
 			Console.Error.WriteLine("Usage: ./LinkSpector <rootUri>");
-			return 1;
+			return (int)ExitCode.ArgumentError;
 		}
-		Uri rootUri = ParseUri(args[0]);
+		Uri? rootUri = ParseUri(args[0]);
+		if (rootUri == null)
+		{
+			Logger.Error("Invalid URI");
+			return (int)ExitCode.ArgumentError;
+		}
+		
+		
 		
 		// Create a new instance of the LinkSpector class
 		LinkSpector linkSpector = new(rootUri);
@@ -29,16 +36,11 @@ static class Program
 		int errorResults = results.Count(r => r.StatusCode != 200);
 		
 		Console.WriteLine($"\ud83d\udd0e {totalResults} Total (in {stopwatch.ElapsedMilliseconds}ms) - \u2705 {okResults} OK, \u26d4 {errorResults} Errors");
-		return 0;
+		return (int)ExitCode.Ok;
 	}
 	
-	private static Uri ParseUri(string uri)
+	private static Uri? ParseUri(string uri)
 	{
-		if (Uri.TryCreate(uri, UriKind.Absolute, out Uri? result))
-		{
-			return result;
-		}
-		
-		throw new ArgumentException("Invalid URI", nameof(uri));
+		return Uri.TryCreate(uri, UriKind.Absolute, out Uri? result) ? result : null;
 	}
 }
