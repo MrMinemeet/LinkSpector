@@ -3,6 +3,10 @@ LinkSpector is a C# project for checking the validity of links ion a given websi
 
 The project is inspired by [Lychee](https://lycheeorg.github.io/lychee/) that is written in Rust and created by awesome developers such as [Matthias Endler](https://github.com/mre).
 
+## TODOs
+* Ignore URIs in HTML comments (they are not functional in the website so no need to check them)
+* Handle [HTTP 999](https://http.dev/999#linkedin) from LinkedIn as a "success" (it it is successful in some kind)
+ 
 ---
 
 # Course Information
