@@ -14,7 +14,7 @@ public static class Quirks
 	private const string YOUTUBE_SHORT_REGEX = @"https?://youtu\.be/(?<id>.*)";
 
 	// LinkedIn
-	private const string LINKEDIN_REGEX = @"https?://(?:www\.)?linkedin\.com/.*";
+	private const string LINKEDIN_REGEX = @"https?://(?:[a-zA-Z0-9-]+\.)?linkedin\.com/.*";
 
 	/// <summary>
 	/// Checks if the URI is excluded from the crawl.
