@@ -38,11 +38,17 @@ public class LinkSpector
 			}
 			else
 			{
-				Uri uri = response.RequestMessage?.RequestUri ?? new Uri("http://unknown.local");
+				HttpResponseMessage resp = response;
+				if (Quirks.IsQuirkyResponse(ref resp))
+				{
+					Logger.Info("Quirk applied");
+				}
+
+				Uri uri = resp.RequestMessage?.RequestUri ?? new Uri("http://unknown.local");
 				Results.Add(new LinkSpectorResult(
 					uri,
-					(int)response.StatusCode,
-					response.ReasonPhrase ?? "Unknown"
+					(int)resp.StatusCode,
+					resp.ReasonPhrase ?? "Unknown"
 				));
 			}
 		}

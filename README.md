@@ -5,7 +5,7 @@ The project is inspired by [Lychee](https://lycheeorg.github.io/lychee/) that is
 
 ## TODOs
 Some stuff is written into source-code with `// TODO` so check that as well. Other more general things are written here:
-* Handle [HTTP 999](https://http.dev/999#linkedin) from LinkedIn as a "success" (it it is successful in some kind)
+* Seems a bit empty here, maybe you find some other stuff that has to be done
  
 ---
 
