@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Net;
 
 namespace LinkSpector;
 
@@ -18,8 +19,6 @@ static class Program
 			return (int)ExitCode.ArgumentError;
 		}
 		
-		
-		
 		// Create a new instance of the LinkSpector class
 		LinkSpector linkSpector = new(rootUri);
 
@@ -36,6 +35,12 @@ static class Program
 		int errorResults = results.Count(r => r.StatusCode != 200);
 		
 		Console.WriteLine($"\ud83d\udd0e {totalResults} Total (in {stopwatch.ElapsedMilliseconds}ms) - \u2705 {okResults} OK, \u26d4 {errorResults} Error(s)");
+		
+		foreach(LinkSpectorResult result in results.Where(r => r.StatusCode != 200))
+		{
+			Console.WriteLine(result);
+		}
+		
 		return (int)ExitCode.Ok;
 	}
 	
