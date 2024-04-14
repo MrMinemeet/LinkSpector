@@ -177,7 +177,7 @@ public class LinkSpector
 
 		// Match relative URIS based on href or src attributes. And they must not start with http(s)://
 		List<Match> relUris =
-			Regex.Matches(content, @"(?:href|src)=""(?<uri>(?!(?:https?://|mailto:|#))[^""]*)""").ToList();
+			Regex.Matches(content, @"(?:href|src)=""(?<uri>(?!(?:https?://|mailto:|tel:|#))[^""]*)""").ToList();
 		foreach (Match m in relUris)
 		{
 			try
