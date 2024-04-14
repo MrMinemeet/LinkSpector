@@ -10,4 +10,10 @@ public record LinkSpectorResult(
 	Uri Uri,
 	int StatusCode,
 	string StatusDescription
-);
+)
+{
+	public override string ToString()
+	{
+		return $"[{StatusCode}] {Uri} - {StatusDescription}";
+	}
+}
