@@ -6,7 +6,7 @@ namespace LinkSpector;
 
 public class LinkSpector
 {
-	private const int EXCEPTION_DURING_REQUEST = -100;
+	public const int EXCEPTION_DURING_REQUEST = -100;
 
 	public List<LinkSpectorResult> Results { get; } = new();
 	public LinkSpectorOptions Options { get; } = new();
@@ -71,7 +71,9 @@ public class LinkSpector
 
 			runningTasks.Clear();
 			// Perform a batch of requests
-			foreach (Uri uri in toRequest)
+			foreach (Uri uri in toRequest
+				         .Where(u => !Quirks.IsExcluded(u)) // Exclude URIs that are known to be problematic
+				         .Select(u => Quirks.IsQuirkyAddress(u))) // Fix quirky URIs
 			{
 				runningTasks.Add(Task.Run(async () =>
 				{
@@ -174,12 +176,13 @@ public class LinkSpector
 		#region Relative URI matching
 
 		// Match relative URIS based on href or src attributes. And they must not start with http(s)://
-		List<Match> relUris = Regex.Matches(content, @"(?:href|src)=""(?<uri>(?!(?:https?://|mailto:|#))[^""]*)""").ToList();
+		List<Match> relUris =
+			Regex.Matches(content, @"(?:href|src)=""(?<uri>(?!(?:https?://|mailto:|#))[^""]*)""").ToList();
 		foreach (Match m in relUris)
 		{
 			try
 			{
-				if(response.RequestMessage == null || response.RequestMessage.RequestUri == null) continue;
+				if (response.RequestMessage == null || response.RequestMessage.RequestUri == null) continue;
 				uris.Add(new Uri(response.RequestMessage.RequestUri, m.Groups["uri"].Value));
 			}
 			catch (UriFormatException ex)
@@ -187,7 +190,6 @@ public class LinkSpector
 				Logger.Error($"Could not convert '{m}' to an URI: {ex.Message}");
 			}
 		}
-		
 
 		#endregion
 
