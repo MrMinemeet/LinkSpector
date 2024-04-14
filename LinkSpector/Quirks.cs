@@ -66,30 +66,28 @@ public static class Quirks
 	}
 
 	/// <summary>
-	/// Checks if the response is quirky.
-	/// If the response is quirky, the status code and reason phrase are adjusted.
+	/// Checks if the result is quirky.
+	/// It checks the results required for a <see cref="LinkSpectorResult"/>
 	/// </summary>
-	/// <param name="response">The response to check.</param>
-	/// <returns>True if the response is quirky, false otherwise.</returns>
-	public static bool IsQuirkyResponse(ref HttpResponseMessage response)
+	/// <param name="uri">The URI of the result.</param>
+	/// <param name="response">The HTTP response message.</param>
+	/// <returns>An updated result if a quirk was found, the original is returned.</returns>
+	public static LinkSpectorResult UnquirkifyResult(Uri uri, HttpResponseMessage response)
 	{
-		if (response.RequestMessage == null || response.RequestMessage.RequestUri == null) return false;
-		Uri uri = response.RequestMessage.RequestUri;
-
+		HttpStatusCode statusCode = response.StatusCode;
+		string statusDescription = response.ReasonPhrase ?? string.Empty;
+		
 		#region LinkedIn
-
 		// Response is technically OK but LinkedIn is weird and does this https://http.dev/999#linkedin
-		if ((int)response.StatusCode == 999 && Regex.IsMatch(uri.AbsoluteUri, LINKEDIN_REGEX))
+		if ((int)statusCode == 999 && Regex.IsMatch(uri.AbsoluteUri, LINKEDIN_REGEX))
 		{
-			response.StatusCode = HttpStatusCode.OK;
-			response.ReasonPhrase = "OK (LinkedIn)";
-			return true;
+			return new(uri, statusCode, "OK (LinkedIn)", true);
 		}
-
 		#endregion
 
-		// TODO: There may be more response quirks
-
-		return false;
+		// TODO: Maybe add more response quirks
+		
+		// No quirks, return as normal
+		return new(uri, statusCode, statusDescription);
 	}
 }

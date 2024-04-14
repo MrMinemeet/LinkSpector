@@ -6,7 +6,11 @@ namespace LinkSpector;
 
 public class LinkSpector
 {
-	public const int EXCEPTION_DURING_REQUEST = -100;
+	public enum HttpCodes
+	{
+		ExceptionDuringRequest = -100,
+		QuirkyResponse = -200,
+	}
 
 	public List<LinkSpectorResult> Results { get; } = new();
 	public LinkSpectorOptions Options { get; } = new();
@@ -32,24 +36,14 @@ public class LinkSpector
 			{
 				Results.Add(new LinkSpectorResult(
 					new Uri("http://unknown.local"),
-					EXCEPTION_DURING_REQUEST,
+					HttpCodes.ExceptionDuringRequest,
 					"Exception during request, see logs for more information"
 				));
 			}
 			else
 			{
-				HttpResponseMessage resp = response;
-				if (Quirks.IsQuirkyResponse(ref resp))
-				{
-					Logger.Info("Quirk applied");
-				}
-
-				Uri uri = resp.RequestMessage?.RequestUri ?? new Uri("http://unknown.local");
-				Results.Add(new LinkSpectorResult(
-					uri,
-					(int)resp.StatusCode,
-					resp.ReasonPhrase ?? "Unknown"
-				));
+				Uri uri = response.RequestMessage?.RequestUri ?? new Uri("http://unknown.local");
+				Results.Add(Quirks.UnquirkifyResult(uri, response));
 			}
 		}
 
