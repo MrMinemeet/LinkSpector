@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace LinkSpector;
@@ -7,7 +8,7 @@ public class LinkSpector
 {
 	private const int EXCEPTION_DURING_REQUEST = -100;
 	
-	public List<LinkSpectorResult> Results { get; private set; } = new();
+	public List<LinkSpectorResult> Results { get; } = new();
 	private readonly Crawler _crawler;
 	private readonly Uri _rootUri;
 
@@ -87,7 +88,7 @@ public class LinkSpector
 					}
 					catch (Exception e)
 					{
-						Logger.Error($"Error requesting '{uri}': {e.Message}");
+						Logger.Debug($"Error requesting '{uri}': {e.Message}");
 						// Mark as visited with a null response
 						currentVisited[uri] = null;
 					}
@@ -153,31 +154,22 @@ public class LinkSpector
 		HashSet<Uri> uris = new();
 		if (response.Content.Headers.ContentType?.MediaType != "text/html") return uris;
 		string content = await response.Content.ReadAsStringAsync();
-
-		List<Match> matches = new();
-		// TODO: Improve URI extraction, this is very basic and does not find all URIs in the content (Maybe match the URI itself instead of the attributes)
-		// Match URIs in "href" attributes
-		Regex.Matches(content, @"href=""(?<uri>[^""]*)""").ToList().ForEach(matches.Add);
-		// Match URIs in "src" attributes
-		Regex.Matches(content, @"src=""(?<uri>[^""]*)""").ToList().ForEach(matches.Add);
-		// Match URIs in "action" attributes
-		Regex.Matches(content, @"action=""(?<uri>[^""]*)""").ToList().ForEach(matches.Add);
-
-		Logger.Debug($"Found {matches.Count} URIs in response of '{response.RequestMessage?.RequestUri}'");
-		foreach (Match match in matches)
+		
+		#region Absolute URI matching
+		// Match absolute HTTP(s) URIs
+		List<Match> absUris = Regex.Matches(content, @"(https?://[^\s]+)(?=\"")").ToList();
+		Logger.Debug($"Found {absUris.Count} absolute URIs in response of '{response.RequestMessage?.RequestUri}'");
+		absUris.ForEach(m =>
 		{
-			string uri = match.Groups["uri"].Value;
-			// Check if the URI is relative
-			if (!Uri.TryCreate(uri, UriKind.Absolute, out Uri? result))
-			{
-				Uri baseUri = response.RequestMessage?.RequestUri ?? new Uri("http://unknown.local");
-				uris.Add(new Uri(baseUri, uri));
-			}
-			else
-			{
-				uris.Add(result);
-			}
-		}
+			try { uris.Add(new Uri(m.Value)); }
+			catch (UriFormatException ex) { Logger.Error($"Could not convert '{m}' to an URI: {ex.Message}"); }
+		});
+
+		#endregion
+		
+		#region Relative URI matching
+		// TODO: Find relative URIs in the content
+		#endregion
 
 		return uris;
 	}
