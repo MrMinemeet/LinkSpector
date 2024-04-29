@@ -13,14 +13,19 @@ public class LinkSpector
 	}
 
 	public List<LinkSpectorResult> Results { get; } = new();
-	public LinkSpectorOptions Options { get; } = new();
+	private readonly LinkSpectorOptions _options = new();
 	private readonly Crawler _crawler;
 	private readonly Uri _rootUri;
 
 	public LinkSpector(Uri rootUri)
 	{
-		_crawler = new(Options.Timeout, Options.AllowInsecure);
+		_crawler = new(_options.Timeout, _options.AllowInsecure);
 		_rootUri = rootUri;
+	}
+
+	public LinkSpector(Uri rootUri, LinkSpectorOptions options) : this(rootUri)
+	{
+		_options = options;
 	}
 
 	/// <summary>
@@ -63,7 +68,7 @@ public class LinkSpector
 		Logger.Debug("Starting crawl...");
 		for (int iteration = 0; toRequest.Count > 0; iteration++)
 		{
-			if (!Options.Recursive && iteration > 1) break;
+			if (!_options.Recursive && iteration > 1) break;
 
 			#region Perform request batch
 
