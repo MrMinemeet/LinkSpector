@@ -17,6 +17,7 @@ Released under MIT license</Description>
         <PackageProjectUrl>https://github.com/MrMinemeet/LinkSpector</PackageProjectUrl>
         <PackageLicenseUrl>https://github.com/MrMinemeet/LinkSpector/blob/main/LICENSE</PackageLicenseUrl>
         <RepositoryUrl>https://github.com/MrMinemeet/LinkSpector</RepositoryUrl>
+        <PublishSingleFile>true</PublishSingleFile>
     </PropertyGroup>
 
 </Project>

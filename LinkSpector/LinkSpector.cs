@@ -42,7 +42,7 @@ public class LinkSpector
 	/// </summary>
 	public void Run()
 	{
-		Logger.Info("Running LinkSpector...");
+		Logger.Debug("Running LinkSpector...");
 		List<HttpResponseMessage?> responseMessages = PerformCrawl().Result;
 		foreach (HttpResponseMessage? response in responseMessages)
 		{
