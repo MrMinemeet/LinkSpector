@@ -12,8 +12,8 @@ public class LinkSpector
 		QuirkyResponse = -200,
 	}
 
-	private int _pagesToVisit;
-	private int _pagesVisited;
+	private int _pagesToVisit = 1;
+	private int _pagesVisited = 1;
 	public int PagesToVisit { get => _pagesToVisit; }
 	public int PagesVisited { get => _pagesVisited; }
 	public List<LinkSpectorResult> Results { get; } = new();
