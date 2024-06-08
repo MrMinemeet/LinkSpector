@@ -12,6 +12,10 @@ public class LinkSpector
 		QuirkyResponse = -200,
 	}
 
+	private int _pagesToVisit;
+	private int _pagesVisited;
+	public int PagesToVisit { get => _pagesToVisit; }
+	public int PagesVisited { get => _pagesVisited; }
 	public List<LinkSpectorResult> Results { get; } = new();
 	private readonly LinkSpectorOptions _options = new();
 	private readonly Crawler _crawler;
@@ -87,6 +91,7 @@ public class LinkSpector
 						Logger.Debug($"Requesting '{uri}'");
 						Task<HttpResponseMessage> response = _crawler.GetWebPage(uri);
 						await response;
+						Interlocked.Increment(ref _pagesVisited);
 						Logger.Debug($"Received '{uri}'");
 						currentVisited[uri] = response.Result;
 					}
@@ -130,6 +135,7 @@ public class LinkSpector
 					HashSet<Uri> uris = await ExtractUrisFromResponse(response);
 					foreach (Uri discoveredUri in uris.Where(u => !visited.ContainsKey(u)))
 					{
+						Interlocked.Increment(ref _pagesToVisit);
 						toRequest.Add(discoveredUri);
 					}
 				}));
@@ -207,7 +213,7 @@ public class LinkSpector
 	/// </summary>
 	/// <param name="html">The HTML content.</param>
 	/// <returns>The sanitized HTML content.</returns>
-	private string SanitizeHtml(string html)
+	private static string SanitizeHtml(string html)
 	{
 		StringBuilder sb = new();
 		for (int i = 0; i < html.Length - 3; i++)
