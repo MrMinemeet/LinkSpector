@@ -5,7 +5,18 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <AssemblyVersion>0.0.1</AssemblyVersion>
+        <AssemblyVersion>1.0.0</AssemblyVersion>
+        <Title>LinkSpector</Title>
+        <Authors>Alexander Voglsperger (MrMinemeet)</Authors>
+        <Description>Async Link Checker for finding broken links. 
+
+Created as a project for the LVA "Software Development in C#" 
+
+Released under MIT license</Description>
+        <Copyright>Alexander Voglsperger</Copyright>
+        <PackageProjectUrl>https://github.com/MrMinemeet/LinkSpector</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/MrMinemeet/LinkSpector/blob/main/LICENSE</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/MrMinemeet/LinkSpector</RepositoryUrl>
     </PropertyGroup>
 
 </Project>
