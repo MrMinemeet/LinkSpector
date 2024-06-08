@@ -1,4 +1,9 @@
-﻿using System.Diagnostics;
+﻿/*
+ * Copyright (c) 2024. Alexander Voglsperger
+ * Licensed under the MIT License. See License in the project root for license information.
+ */
+
+using System.Diagnostics;
 
 namespace LinkSpector;
 
@@ -8,6 +13,7 @@ static class Program
 	{
 		if (args.Length == 0)
 		{
+			Console.Error.WriteLine("Copyright \u00a9\ufe0f 2024. Alexander Voglsperger");
 			Console.Error.WriteLine("Usage: ./LinkSpector [options] <rootUri>");
 			Console.Error.WriteLine("Options:");
 			Console.Error.WriteLine("  -r\tRecursively crawl the website.");
