@@ -57,12 +57,31 @@ static class Program
 		#endregion
 
 		#region Create a new instance of the LinkSpector and perform the crawl
-		LinkSpector linkSpector = new(rootUri, options);
 
+		LinkSpector linkSpector = new(rootUri, options);
+		CancellationTokenSource cts = new();
+		Thread statusUpdateThread = new(() =>
+		{
+			int lastPagesVisited = 0;
+			int lastPagesToVisit = 0;
+			Logger.Debug("Starting status update thread...");
+			while (!cts.IsCancellationRequested)
+			{
+				if (linkSpector.PagesVisited != lastPagesVisited || linkSpector.PagesToVisit != lastPagesToVisit)
+				{
+					lastPagesVisited = linkSpector.PagesVisited;
+					lastPagesToVisit = linkSpector.PagesToVisit;
+					Console.WriteLine($"{linkSpector.PagesVisited} out of {linkSpector.PagesToVisit} pages visited");
+				}
+				Thread.Sleep(500);
+			}
+		});
 		Stopwatch stopwatch = Stopwatch.StartNew();
 		// Run the LinkSpector
+		statusUpdateThread.Start();
 		linkSpector.Run();
 		stopwatch.Stop();
+		cts.Cancel();
 		Logger.Debug($"LinkSpector completed in {stopwatch.ElapsedMilliseconds}ms");
 		#endregion
 		List<LinkSpectorResult> results = linkSpector.Results;
