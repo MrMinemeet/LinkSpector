@@ -114,7 +114,7 @@ static class Program
 		
 		int totalResults = results.Count;
 		int okResults = results.Count(r => r.StatusCode == 200);
-		int errorResults = results.Count(r => r.StatusCode != 200);
+		int errorResults = results.Count(r => r.StatusCode != 200 && r.StatusCode > 0 || r.IsQuirky);
 		
 		Console.WriteLine($"\ud83d\udd0e {totalResults} Total (in {stopwatch.ElapsedMilliseconds}ms) - \u2705 {okResults} OK, \u26d4 {errorResults} Error(s)");
 		
