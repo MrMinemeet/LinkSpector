@@ -16,6 +16,8 @@ public class LinkSpector
 		ExceptionDuringRequest = -100,
 		QuirkyResponse = -200,
 	}
+	
+	private readonly Logger _logger = Logger.GetInstance();
 
 	private int _pagesToVisit = 1;
 	private int _pagesVisited = 1;
@@ -42,7 +44,7 @@ public class LinkSpector
 	/// </summary>
 	public void Run()
 	{
-		Logger.Debug("Running LinkSpector...");
+		_logger.Debug("Running LinkSpector...");
 		List<HttpResponseMessage?> responseMessages = PerformCrawl().Result;
 		foreach (HttpResponseMessage? response in responseMessages)
 		{
@@ -61,7 +63,7 @@ public class LinkSpector
 			}
 		}
 
-		Logger.Debug("LinkSpector completed");
+		_logger.Debug("LinkSpector completed");
 	}
 
 	/// <summary>
@@ -74,7 +76,7 @@ public class LinkSpector
 		HashSet<Uri> toRequest = [_rootUri];
 		Dictionary<Uri, HttpResponseMessage?> visited = new();
 
-		Logger.Debug("Starting crawl...");
+		_logger.Debug("Starting crawl...");
 		for (int iteration = 0; toRequest.Count > 0; iteration++)
 		{
 			if (!_options.Recursive && iteration > 1) break;
@@ -93,16 +95,16 @@ public class LinkSpector
 				{
 					try
 					{
-						Logger.Debug($"Requesting '{uri}'");
+						_logger.Debug($"Requesting '{uri}'");
 						Task<HttpResponseMessage> response = _crawler.GetWebPage(uri);
 						await response;
 						Interlocked.Increment(ref _pagesVisited);
-						Logger.Debug($"Received '{uri}'");
+						_logger.Debug($"Received '{uri}'");
 						currentVisited[uri] = response.Result;
 					}
 					catch (Exception e)
 					{
-						Logger.Debug($"Error requesting '{uri}': {e.Message}");
+						_logger.Debug($"Error requesting '{uri}': {e.Message}");
 						// Mark as visited with a null response
 						currentVisited[uri] = null;
 					}
@@ -132,7 +134,7 @@ public class LinkSpector
 					continue;
 				}
 
-				Logger.Debug($"Extracting URIs from response from '{uri}'");
+				_logger.Debug($"Extracting URIs from response from '{uri}'");
 
 
 				runningTasks.Add(Task.Run(async () =>
@@ -154,7 +156,7 @@ public class LinkSpector
 			#endregion
 		}
 
-		Logger.Debug("Crawl completed");
+		_logger.Debug("Crawl completed");
 		return visited.Values.ToList();
 	}
 
@@ -174,7 +176,7 @@ public class LinkSpector
 
 		// Match absolute HTTP(s) URIs
 		List<Match> absUris = Regex.Matches(content, @"(https?://[^\s""]+)").ToList();
-		Logger.Debug($"Found {absUris.Count} absolute URIs in response of '{response.RequestMessage?.RequestUri}'");
+		_logger.Debug($"Found {absUris.Count} absolute URIs in response of '{response.RequestMessage?.RequestUri}'");
 		absUris.ForEach(m =>
 		{
 			try
@@ -183,7 +185,7 @@ public class LinkSpector
 			}
 			catch (UriFormatException ex)
 			{
-				Logger.Error($"Could not convert '{m}' to an URI: {ex.Message}");
+				_logger.Error($"Could not convert '{m}' to an URI: {ex.Message}");
 			}
 		});
 
@@ -203,7 +205,7 @@ public class LinkSpector
 			}
 			catch (UriFormatException ex)
 			{
-				Logger.Error($"Could not convert '{m}' to an URI: {ex.Message}");
+				_logger.Error($"Could not convert '{m}' to an URI: {ex.Message}");
 			}
 		}
 
