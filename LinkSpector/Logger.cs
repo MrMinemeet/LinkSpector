@@ -10,26 +10,50 @@ namespace LinkSpector;
 /// <summary>
 /// Helper class for logging messages.
 /// </summary>
-public static class Logger
+public class Logger
 {
-	// TODO: Add ability to write to a file instead of the console
+	private static Logger? _instance;
+	public delegate void LogMessage(string message);
+	private static LogMessage _logMessage = Console.WriteLine;
+	
+	/// <summary>
+	/// Gets the singleton instance of the logger.
+	/// Will only apply the delegate if the instance is not already created.
+	/// By default, logs to the console.
+	/// </summary>
+	public static Logger GetInstance(LogMessage? loggerDelegate = null)
+	{
+		if (_instance != null)
+		{
+			return _instance;
+		}
+
+		if (loggerDelegate != null)
+		{
+			_logMessage = loggerDelegate;
+		}
+		
+		_instance = new Logger();
+		return _instance;
+
+	}
 	
 	/// <summary>
 	/// Logs an informational message.
 	/// </summary>
 	/// <param name="message">The message to log.</param>
-	public static void Info(string message)
+	public void Info(string message)
 	{
-		Console.WriteLine($"{GetTimestamp()} [INFO] {message}");
+		_logMessage($"{GetTimestamp()} [INFO] {message}");
 	}
 	
 	/// <summary>
 	/// Logs an error message. Writes to the error stream.
 	/// </summary>
 	/// <param name="message">The message to log.</param>
-	public static void Error(string message)
+	public void Error(string message)
 	{
-		Console.Error.WriteLine($"{GetTimestamp()} [ERROR] {message}");
+		_logMessage($"{GetTimestamp()} [ERROR] {message}");
 	}
 	
 	/// <summary>
@@ -37,9 +61,9 @@ public static class Logger
 	/// </summary>
 	/// <param name="message">The message to log.</param>
 	[Conditional("DEBUG")]
-	public static void Debug(string message)
+	public void Debug(string message)
 	{
-		Console.WriteLine($"{GetTimestamp()} [DEBUG] {message}");
+		_logMessage($"{GetTimestamp()} [DEBUG] {message}");
 	}
 	
 	/// <summary>

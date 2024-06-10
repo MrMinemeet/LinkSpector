@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2024. Alexander Voglsperger
  * Licensed under the MIT License. See License in the project root for license information.
  */
@@ -9,6 +9,8 @@ namespace LinkSpector;
 
 static class Program
 {
+	private static Logger? _logger;
+	
 	static int Main(string[] args)
 	{
 		if (args.Length == 0)
@@ -19,29 +21,39 @@ static class Program
 			Console.Error.WriteLine("  -r\tRecursively crawl the website.");
 			Console.Error.WriteLine("  -i\tAllow insecure/no TLS certificates.");
 			Console.Error.WriteLine("  -t <number>\tTimeout in seconds.");
+			Console.Error.WriteLine("  -l <file>\tLog to file.");
 			
 			return (int)ExitCode.ArgumentError;
 		}
-		Uri? rootUri = ParseUri(args[^1]); // = args[args.length - 1]
-		if (rootUri == null)
-		{
-			Logger.Error("Invalid URI at last argument.");
-			return (int)ExitCode.ArgumentError;
-		}
+		
+		int logFileIndex = Array.IndexOf(args, "-l");
+		Logger.LogMessage? logMessage = null;
 		
 		#region Parse argument 0 to n-1 as options
+		if (logFileIndex != -1)
+		{
+			logMessage = message =>
+			{
+				TextWriter logFile = new StreamWriter(args[logFileIndex + 1], append: true);
+				logFile.WriteLine(message);
+			};
+		}
+		_logger = Logger.GetInstance(logMessage);
+		
 		LinkSpectorOptions options = new();
 		if (args.Any(s => s == "-r"))
 		{
 			options.Recursive = true;
 		}
+		
 		if (args.Any(s => s == "-i"))
 		{
 			options.AllowInsecure = true;
 		}
-		if (args.Any(s => s == "-t"))
+		
+		int timeoutIndex = Array.IndexOf(args, "-t");
+		if (timeoutIndex != -1)
 		{
-			int timeoutIndex = Array.IndexOf(args, "-t");
 			if (timeoutIndex + 1 < args.Length)
 			{
 				if (int.TryParse(args[timeoutIndex + 1], out int timeout))
@@ -50,17 +62,25 @@ static class Program
 				}
 				else
 				{
-					Logger.Error("Invalid timeout value.");
+					_logger.Error("Invalid timeout value.");
 					return (int)ExitCode.ArgumentError;
 				}
 			}
 			else
 			{
-				Logger.Error("No timeout value provided.");
+				_logger.Error("No timeout value provided.");
 				return (int)ExitCode.ArgumentError;
 			}
 		}
 		#endregion
+		
+		// Parse the last argument as the root URI
+		Uri? rootUri = ParseUri(args[^1]); // = args[args.length - 1]
+		if (rootUri == null)
+		{
+			_logger.Error("Invalid URI at last argument.");
+			return (int)ExitCode.ArgumentError;
+		}
 
 		#region Create a new instance of the LinkSpector and perform the crawl
 
@@ -70,7 +90,7 @@ static class Program
 		{
 			int lastPagesVisited = 0;
 			int lastPagesToVisit = 0;
-			Logger.Debug("Starting status update thread...");
+			_logger.Debug("Starting status update thread...");
 			while (!cts.IsCancellationRequested)
 			{
 				if (linkSpector.PagesVisited != lastPagesVisited || linkSpector.PagesToVisit != lastPagesToVisit)
@@ -88,7 +108,7 @@ static class Program
 		linkSpector.Run();
 		stopwatch.Stop();
 		cts.Cancel();
-		Logger.Debug($"LinkSpector completed in {stopwatch.ElapsedMilliseconds}ms");
+		_logger.Debug($"LinkSpector completed in {stopwatch.ElapsedMilliseconds}ms");
 		#endregion
 		List<LinkSpectorResult> results = linkSpector.Results;
 		
