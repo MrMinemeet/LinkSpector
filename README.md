@@ -12,6 +12,7 @@ The application is a console application and can be run from the command line. T
 * `-r` - Toggles recursive mode. If enabled, the application will also check links on linked pages (only applies to the same domain). Default is false.
 * `-i` - Allow insecure/no TLS certificates. Default is false.
 * `-t <timeout>` - Set the timeout for each request in milliseconds. Default is 20 seconds.
+* `-l <file>` - Log output to a file. Default is console output.
 
 Example:
 ```
